@@ -10,5 +10,4 @@ class RenderProcessor extends ProcessorBase implements ProcessorInterface {
       	$this->container->output = $this->container['output'];
       	$this->container->fireEvent('onOutputGenerated');
     }
-
 }

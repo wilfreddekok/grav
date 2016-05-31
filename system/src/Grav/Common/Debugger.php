@@ -145,10 +145,10 @@ class Debugger
     public function render()
     {
         if ($this->enabled()) {
-            echo $this->renderer->render();
+            return $this->renderer->render();
         }
 
-        return $this;
+        return;
     }
 
     /**
@@ -173,7 +173,7 @@ class Debugger
      */
     public function startTimer($name, $description = null)
     {
-        if ($name[0] == '_' || $this->config->get('system.debugger.enabled')) {
+        if ($name[0] !== '!' && ($name[0] === '_' || $this->config->get('system.debugger.enabled'))) {
             $this->debugbar['time']->startMeasure($name, $description);
             $this->timers[] = $name;
         }

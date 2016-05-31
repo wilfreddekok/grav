@@ -58,6 +58,7 @@ class Grav extends Container
         'pagesProcessor'          => 'Grav\Common\Processors\PagesProcessor',
         'debuggerAssetsProcessor' => 'Grav\Common\Processors\DebuggerAssetsProcessor',
         'renderProcessor'         => 'Grav\Common\Processors\RenderProcessor',
+        'responseProcessor'       => 'Grav\Common\Processors\ResponseProcessor',
     ];
 
     /** @var array All processors that are processed in $this->process() */
@@ -75,6 +76,7 @@ class Grav extends Container
         'pagesProcessor',
         'debuggerAssetsProcessor',
         'renderProcessor',
+        'responseProcessor',
     ];
 
     /**
@@ -113,9 +115,6 @@ class Grav extends Container
      */
     public function process()
     {
-        /** @var Debugger $debugger */
-        $debugger = $this['debugger'];
-
         // process all processors (e.g. config, initialize, assets, ..., render)
         foreach ($this->processors as $processor) {
             $processor = $this[$processor];
@@ -123,14 +122,6 @@ class Grav extends Container
                 $processor->process();
             });
         }
-
-        // Set the header type
-        $this->header();
-
-        echo $this->output;
-        $debugger->render();
-
-        $this->fireEvent('onOutputRendered');
 
         register_shutdown_function([$this, 'shutdown']);
     }
@@ -211,79 +202,6 @@ class Grav extends Container
     }
 
     /**
-     * Returns mime type for the file format.
-     *
-     * @param string $format
-     *
-     * @return string
-     */
-    public function mime($format)
-    {
-        switch ($format) {
-            case 'json':
-                return 'application/json';
-            case 'html':
-                return 'text/html';
-            case 'atom':
-                return 'application/atom+xml';
-            case 'rss':
-                return 'application/rss+xml';
-            case 'xml':
-                return 'application/xml';
-        }
-
-        return 'text/html';
-    }
-
-    /**
-     * Set response header.
-     */
-    public function header()
-    {
-        $extension = $this['uri']->extension();
-
-        /** @var Page $page */
-        $page = $this['page'];
-
-        header('Content-type: ' . $this->mime($extension));
-
-        // Calculate Expires Headers if set to > 0
-        $expires = $page->expires();
-
-        if ($expires > 0) {
-            $expires_date = gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT';
-            header('Cache-Control: max-age=' . $expires);
-            header('Expires: ' . $expires_date);
-        }
-
-        // Set the last modified time
-        if ($page->lastModified()) {
-            $last_modified_date = gmdate('D, d M Y H:i:s', $page->modified()) . ' GMT';
-            header('Last-Modified: ' . $last_modified_date);
-        }
-
-        // Calculate a Hash based on the raw file
-        if ($page->eTag()) {
-            header('ETag: ' . md5($page->raw() . $page->modified()));
-        }
-
-        // Set debugger data in headers
-        if (!($extension === null || $extension == 'html')) {
-            $this['debugger']->enabled(false);
-        }
-
-        // Set HTTP response code
-        if (isset($this['page']->header()->http_response_code)) {
-            http_response_code($this['page']->header()->http_response_code);
-        }
-
-        // Vary: Accept-Encoding
-        if ($this['config']->get('system.pages.vary_accept_encoding', false)) {
-            header('Vary: Accept-Encoding');
-        }
-    }
-
-    /**
      * Fires an event with optional parameters.
      *
      * @param  string $eventName
@@ -316,15 +234,10 @@ class Grav extends Container
         }
 
         if ($this['config']->get('system.debugger.shutdown.close_connection', true)) {
-            // Flush the response and close the connection to allow time consuming tasks to be performed without leaving
-            // the connection to the client open. This will make page loads to feel much faster.
-
             // FastCGI allows us to flush all response data to the client and finish the request.
             $success = function_exists('fastcgi_finish_request') ? @fastcgi_finish_request() : false;
 
             if (!$success) {
-                // Unfortunately without FastCGI there is no way to force close the connection.
-                // We need to ask browser to close the connection for us.
                 if ($this['config']->get('system.cache.gzip')) {
                     // Flush gzhandler buffer if gzip setting was enabled.
                     ob_end_flush();
@@ -335,12 +248,11 @@ class Grav extends Container
                     header('Content-Encoding: none');
                 }
 
-
-                // Get length and close the connection.
+                // Get length and close the connection manually
                 header('Content-Length: ' . ob_get_length());
                 header("Connection: close");
 
-                ob_end_flush();
+                while (@ob_end_flush()) ;
                 @ob_flush();
                 flush();
             }
@@ -348,6 +260,8 @@ class Grav extends Container
 
         // Run any time consuming tasks.
         $this->fireEvent('onShutdown');
+
+        sleep(3);
     }
 
     /**
