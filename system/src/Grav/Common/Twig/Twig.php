@@ -119,22 +119,20 @@ class Twig
             if ($config->get('system.twig.undefined_functions')) {
                 $this->twig->registerUndefinedFunctionCallback(function ($name) {
                     if (function_exists($name)) {
-                        return new \Twig_Function_Function($name);
+                        return new \Twig_Function($name, $name);
                     }
 
-                    return new \Twig_Function_Function(function () {
-                    });
+                    return false;
                 });
             }
 
             if ($config->get('system.twig.undefined_filters')) {
                 $this->twig->registerUndefinedFilterCallback(function ($name) {
                     if (function_exists($name)) {
-                        return new \Twig_Filter_Function($name);
+                        return new \Twig_Filter($name, $name);
                     }
 
-                    return new \Twig_Filter_Function(function () {
-                    });
+                    return false;
                 });
             }
 
@@ -142,7 +140,7 @@ class Twig
 
             // set default date format if set in config
             if ($config->get('system.pages.dateformat.long')) {
-                $this->twig->getExtension('core')->setDateFormat($config->get('system.pages.dateformat.long'));
+                $this->twig->getExtension('Twig_Extension_Core')->setDateFormat($config->get('system.pages.dateformat.long'));
             }
             // enable the debug extension if required
             if ($config->get('system.twig.debug')) {
