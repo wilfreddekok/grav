@@ -764,6 +764,7 @@ class Pages
                     break;
                 case 'hash':
                     $hash = Folder::hashAllFiles($pages_dir);
+                    break;
                 default:
                     $hash = Folder::lastModifiedFile($pages_dir);
             }
@@ -1078,7 +1079,9 @@ class Pages
                 case (is_string($header_query[0])):
                     $child_header = new Header((array)$child->header());
                     $header_value = $child_header->get($header_query[0]);
-                    if ($header_value) {
+                    if (is_array($header_value)) {
+                        $list[$key] = implode(',',$header_value);
+                    } elseif ($header_value) {
                         $list[$key] = $header_value;
                     } else {
                         $list[$key] = $header_default ?: $key;

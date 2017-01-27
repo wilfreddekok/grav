@@ -1,13 +1,40 @@
-# v1.1.13
-## xx/xx/201x
+# v1.1.15
+## xx/xx/2017
 
+1. [](#new)
+    * Added a new `Collection::merge()` method to allow merging of multiple collections [#1258](https://github.com/getgrav/grav/pull/1258)
+1. [](#improved)
+    * Add an additional parameter to GPM::findPackage to avoid throwing an exception, for use in Twig [#1008](https://github.com/getgrav/grav/issues/1008)
+    * Skip symlinks if found while clearing cache [#1269](https://github.com/getgrav/grav/issues/1269)
+1. [](#bugfix)
+    * Fixed an issue when page collection with header-based `sort.by` returns an array [#1264](https://github.com/getgrav/grav/issues/1264)
+    * Fix `Response` object to handle `303` redirects when `open_basedir` in effect [#1267](https://github.com/getgrav/grav/issues/1267)
+    * Silence `E_WARNING: Zend OPcache API is restricted by "restrict_api" configuration directive`
+
+# v1.1.14
+## 01/18/2017
+
+1. [](#bugfix)
+    * Fixed `Page::collection()` returning array and not Collection object when header variable did not exist
+    * Revert `Content-Encoding: identity` fix, and let you set `cache: allow_webserver_gzip:` option to switch to `identity` [#548](https://github.com/getgrav/grav/issues/548)
+
+# v1.1.13
+## 01/17/2017
+
+1. [](#new)
+    * Added new `never_cache_twig` page option in `system.yaml` and frontmatter. Allows dynamic Twig logic in regular and modular Twig templates [#1244](https://github.com/getgrav/grav/pull/1244)
 1. [](#improved)
     * Several improvements to aid theme development [#232](https://github.com/getgrav/grav/pull/1232)
+    * Added `hash` cache check option and made dropdown more descriptive [Admin #923](https://github.com/getgrav/grav-plugin-admin/issues/923)
 1. [](#bugfix)
     * Fixed cross volume file system operations [#635](https://github.com/getgrav/grav/issues/635)
     * Fix issue with pages folders validation not accepting uppercase letters
     * Fix renaming the folder name if the page, in the default language, had a custom slug set in its header
     * Fixed issue with `Content-Encoding: none`. It should really be `Content-Encoding: identity` instead
+    * Fixed broken `hash` method on page modifications detection
+    * Fixed issue with multi-lang pages not caching independently without unique `.md` file [#1211](https://github.com/getgrav/grav/issues/1211)
+    * Fixed all `$_GET` parameters missing in Nginx (please update your nginx.conf) [#1245](https://github.com/getgrav/grav/issues/1245)
+    * Fixed issue in trying to process broken symlink [#1254](https://github.com/getgrav/grav/issues/1254)
 
 # v1.1.12
 ## 12/26/2016
@@ -34,8 +61,8 @@
     * Fixed case where extracting a package would cause an error during rename
     * Fix issue with using `Yaml::parse` direcly on a filename, now deprecated
     * Add pattern for frontend validation of folder slugs [#891](https://github.com/getgrav/grav-plugin-admin/issues/891)
-    * Fix issue with Inflector when translation is disabled [https://github.com/getgrav/grav-plugin-simplesearch/issues/87](https://github.com/getgrav/grav-plugin-simplesearch/issues/87)
-    * Explicitly expose `array_unique` Twig filter [https://github.com/getgrav/grav-plugin-admin/issues/897](https://github.com/getgrav/grav-plugin-admin/issues/897)
+    * Fix issue with Inflector when translation is disabled [SimpleSearch #87](https://github.com/getgrav/grav-plugin-simplesearch/issues/87)
+    * Explicitly expose `array_unique` Twig filter [Admin #897](https://github.com/getgrav/grav-plugin-admin/issues/897)
 
 # v1.1.9
 ## 12/13/2016
@@ -83,7 +110,7 @@
     * Add 2 new language values for French [#1174](https://github.com/getgrav/grav/issues/1174)
 1. [](#bugfix)
     * Fixed issue when we have a meta file without corresponding media [#1179](https://github.com/getgrav/grav/issues/1179)
-    * Update class namespace for Admin class [#874](https://github.com/getgrav/grav-plugin-admin/issues/874)
+    * Update class namespace for Admin class [Admin #874](https://github.com/getgrav/grav-plugin-admin/issues/874)
 
 # v1.1.9-rc.1
 ## 11/09/2016
@@ -146,7 +173,7 @@
 1. [](#bugfix)
     * Fixed missing `progress` method in the DirectInstall Command
     * `Response` class now handles better unsuccessful requests such as 404 and 401
-    * Fixed saving of `external` page types [admin #789](https://github.com/getgrav/grav-plugin-admin/issues/789)
+    * Fixed saving of `external` page types [Admin #789](https://github.com/getgrav/grav-plugin-admin/issues/789)
     * Fixed issue deleting parent folder of folder with `param_sep` in the folder name [admin #796](https://github.com/getgrav/grav-plugin-admin/issues/796)
     * Fixed an issue with streams in `bin/plugin`
     * Fixed `jpeg` file format support in Media
