@@ -16,6 +16,7 @@ use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use RocketTheme\Toolbox\Event\Event;
+use DebugBar\Bridge\Twig\TimeableTwigExtensionProfiler;
 
 class Twig
 {
@@ -38,6 +39,8 @@ class Twig
      * @var string
      */
     public $template;
+
+    public $profiler;
 
     /**
      * @var Grav
@@ -118,6 +121,13 @@ class Twig
             }
 
             $this->twig = new TwigEnvironment($loader_chain, $params);
+
+            // Enabled Twig profiler if debugger is enabled
+            if ($config->get('system.debugger.enabled')) {
+                $this->profiler = new \Twig_Profiler_Profile();
+                $debugbar = $this->grav['debugger']->debugbar();
+                $this->twig->addExtension(new TimeableTwigExtensionProfiler($this->profiler, $debugbar['time']));
+            }
 
             if ($config->get('system.twig.undefined_functions')) {
                 $this->twig->registerUndefinedFunctionCallback(function ($name) {

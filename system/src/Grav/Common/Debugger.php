@@ -11,6 +11,7 @@ namespace Grav\Common;
 use DebugBar\DataCollector\ConfigCollector;
 use DebugBar\JavascriptRenderer;
 use DebugBar\StandardDebugBar;
+use DebugBar\Bridge\TwigProfileCollector;
 use Grav\Common\Config\Config;
 
 class Debugger
@@ -41,6 +42,14 @@ class Debugger
 
         $this->debugbar = new StandardDebugBar();
         $this->debugbar['time']->addMeasure('Loading', $this->debugbar['time']->getRequestStartTime(), microtime(true));
+    }
+
+    /**
+     * @return StandardDebugBar
+     */
+    public function debugbar()
+    {
+        return $this->debugbar;
     }
 
     /**
@@ -89,6 +98,10 @@ class Debugger
     public function addAssets()
     {
         if ($this->enabled()) {
+
+            // Twig is now ready
+            $twig = $this->grav['twig'];
+            $this->debugbar->addCollector(new TwigProfileCollector($twig->profiler));
 
             // Only add assets if Page is HTML
             $page = $this->grav['page'];
